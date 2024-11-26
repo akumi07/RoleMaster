@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../firebase/firebase';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import Navbar from './Navbar';
 
 function Register() {
@@ -19,6 +19,7 @@ function Register() {
     }
 
     try {
+      // Create user in Firebase
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
       // Save user data based on "Remember Me" checkbox
@@ -28,8 +29,18 @@ function Register() {
         sessionStorage.setItem('user', JSON.stringify(userCredential.user));
       }
 
-      // Redirect to login page after successful registration
-      navigate('/login');
+      // Show success message
+      const isConfirmed = window.confirm("Thank you for registering!");
+
+      // If user clicks OK, login and redirect to user management page
+      if (isConfirmed) {
+        // Automatically log the user in
+        await signInWithEmailAndPassword(auth, email, password);
+        
+        // Redirect to user management page
+        navigate('/userManagement');
+      }
+
     } catch (error) {
       console.error('Registration failed:', error.message);
       alert('Registration failed: ' + error.message);
@@ -38,7 +49,6 @@ function Register() {
 
   return (
     <div className="font-[sans-serif]">
-      <Navbar />
       <div className="min-h-screen flex fle-col items-center justify-center py-6 px-4 mt-10">
         <div className="grid md:grid-cols-2 items-center gap-4 max-w-6xl w-full">
           <div className="border border-gray-300 rounded-lg p-6 max-w-md shadow-[0_2px_22px_-4px_rgba(93,96,127,0.2)] max-md:mx-auto">
@@ -123,7 +133,7 @@ function Register() {
               <p className="text-sm !mt-8 text-center text-gray-800">
                 Already have an account{' '}
                 <span
-                  onClick={() => navigate('/login')}
+                  onClick={() => navigate('/userManagement')}
                   className="text-blue-600 font-semibold hover:underline ml-1 whitespace-nowrap cursor-pointer"
                 >
                   Login here
