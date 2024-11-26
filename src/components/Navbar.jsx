@@ -4,10 +4,6 @@ import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
 import { useLogin } from "../context/LoginContext"; // Import the custom hook
 
-const navigation = [
-  { name: "Dashboard", href: "/userManagement", current: true },
-];
-
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
@@ -16,7 +12,6 @@ export default function Navbar() {
   const { isLoggedIn, login, logout } = useLogin(); // Access login state and actions from context
   const navigate = useNavigate();
 
-  // Check login state on page load (to handle manual login)
   useEffect(() => {
     const user = localStorage.getItem("user") || sessionStorage.getItem("user");
     if (user) {
@@ -35,6 +30,20 @@ export default function Navbar() {
       navigate("/login");
     }
   };
+
+  const handleNavigation = (href) => {
+    if (href === "/userManagement" && !isLoggedIn) {
+      // Redirect to login if not logged in
+      alert("Please login to access the dashboard.");
+      navigate("/login");
+    } else {
+      navigate(href); // Navigate to the intended route
+    }
+  };
+
+  const navigation = [
+    { name: "Dashboard", href: "/userManagement", current: true },
+  ];
 
   return (
     <Disclosure as="nav" className="bg-gray-800">
@@ -63,10 +72,9 @@ export default function Navbar() {
             <div className="hidden sm:ml-6 sm:block">
               <div className="flex space-x-4">
                 {navigation.map((item) => (
-                  <a
+                  <button
                     key={item.name}
-                    href={item.href}
-                    aria-current={item.current ? "page" : undefined}
+                    onClick={() => handleNavigation(item.href)}
                     className={classNames(
                       item.current
                         ? "bg-gray-900 text-white"
@@ -75,7 +83,7 @@ export default function Navbar() {
                     )}
                   >
                     {item.name}
-                  </a>
+                  </button>
                 ))}
               </div>
             </div>
@@ -102,9 +110,8 @@ export default function Navbar() {
           {navigation.map((item) => (
             <DisclosureButton
               key={item.name}
-              as="a"
-              href={item.href}
-              aria-current={item.current ? "page" : undefined}
+              as="button"
+              onClick={() => handleNavigation(item.href)}
               className={classNames(
                 item.current
                   ? "bg-gray-900 text-white"
