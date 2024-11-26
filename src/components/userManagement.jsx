@@ -12,15 +12,16 @@ import {
 
 const UserManagement = () => {
   const navigate = useNavigate();
-  const [users, setUsers] = useState([]); // Store users
-  const [searchQuery, setSearchQuery] = useState(""); // Search query
-  const [selectedUsers, setSelectedUsers] = useState([]); // Selected users
-  const [error, setError] = useState(null); // Error state
-  const [loading, setLoading] = useState(true); // Loading state
-  const [currentPage, setCurrentPage] = useState(1); // Pagination
-  const usersPerPage = 5; // Users per page
+  const [users, setUsers] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const usersPerPage = 5;
+  const [showDeleteModal, setShowDeleteModal] = useState(false); // Modal state
+  const [userToDelete, setUserToDelete] = useState(null); // Store the user to delete
 
-  // Fetch users with real-time updates
   useEffect(() => {
     const usersCollection = collection(db, "users");
     const unsubscribe = onSnapshot(
@@ -30,8 +31,8 @@ const UserManagement = () => {
           id: doc.id,
           ...doc.data(),
         }));
-        setUsers(fetchedUsers); // Update state with user data
-        setLoading(false); // Set loading to false
+        setUsers(fetchedUsers);
+        setLoading(false);
       },
       (error) => {
         console.error("Error fetching users:", error);
@@ -40,52 +41,54 @@ const UserManagement = () => {
       }
     );
 
-    return () => unsubscribe(); // Clean up listener
+    return () => unsubscribe();
   }, []);
 
-  // Handle search input
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
   };
 
-  // Filter users based on search query
   const filteredUsers = users.filter(
     (user) =>
       user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Handle checkbox selection for bulk actions
   const handleCheckboxChange = (id) => {
     setSelectedUsers((prev) =>
       prev.includes(id) ? prev.filter((userId) => userId !== id) : [...prev, id]
     );
   };
 
-  // Perform bulk actions
+  // Handle Bulk Actions
   const handleBulkAction = (action) => {
-    if (action === "activate") {
+    if (action === "delete") {
+      // Show the modal when 'delete' action is selected
+      setShowDeleteModal(true);
+    } else if (action === "activate") {
       selectedUsers.forEach(async (userId) => {
         const userRef = doc(db, "users", userId);
         await updateDoc(userRef, { active: true });
       });
-    } else if (action === "delete") {
-      selectedUsers.forEach(async (userId) => {
-        await deleteDoc(doc(db, "users", userId));
-      });
     }
+    setSelectedUsers([]);
+  };
+
+  const handleDelete = async () => {
+    // Delete selected users from the state and database
+    selectedUsers.forEach(async (userId) => {
+      await deleteDoc(doc(db, "users", userId));
+    });
+    setShowDeleteModal(false); // Close modal
     setSelectedUsers([]); // Clear selected users
   };
 
-  // Pagination logic
   const indexOfLastUser = currentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
-  // Handle pagination
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  // Toggle user active status
   const toggleActiveStatus = async (user) => {
     const userRef = doc(db, "users", user.id);
     await updateDoc(userRef, { active: !user.active });
@@ -151,9 +154,7 @@ const UserManagement = () => {
                       e.target.checked ? users.map((user) => user.id) : []
                     )
                   }
-                  checked={
-                    selectedUsers.length === users.length && users.length > 0
-                  }
+                  checked={selectedUsers.length === users.length && users.length > 0}
                   className="rounded"
                 />
               </th>
@@ -165,10 +166,7 @@ const UserManagement = () => {
           </thead>
           <tbody>
             {currentUsers.map((user) => (
-              <tr
-                key={user.id}
-                className="border-t hover:bg-gray-50 transition"
-              >
+              <tr key={user.id} className="border-t hover:bg-gray-50 transition">
                 <td className="p-4 text-center">
                   <input
                     type="checkbox"
@@ -209,9 +207,10 @@ const UserManagement = () => {
                     <FaEdit />
                   </button>
                   <button
-                    onClick={() =>
-                      setUsers(users.filter((u) => u.id !== user.id))
-                    }
+                    onClick={() => {
+                      setUserToDelete(user); // Set user to delete
+                      setShowDeleteModal(true); // Show delete modal
+                    }}
                     className="text-red-500 hover:text-red-700"
                   >
                     <FaTrash />
@@ -240,6 +239,29 @@ const UserManagement = () => {
           Next
         </button>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h2 className="text-xl mb-4">Are you sure you want to delete the selected user(s)?</h2>
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="bg-gray-500 text-white px-4 py-2 rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                className="bg-red-500 text-white px-4 py-2 rounded-lg"
+              >
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

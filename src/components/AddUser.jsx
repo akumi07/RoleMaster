@@ -15,12 +15,13 @@ function AddUserForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [adminEmail, setAdminEmail] = useState(""); // Admin email field
-  const [role, setRole] = useState("user");
+  const [role, setRole] = useState("user"); // Role selection
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState("");
   const [generatedOtp, setGeneratedOtp] = useState("");
   const [verificationStatus, setVerificationStatus] = useState("");
   const [isFirstAdmin, setIsFirstAdmin] = useState(false); // Track if this is the first admin registration
+  const [isLoading, setIsLoading] = useState(false); // Loading state
 
   const db = getFirestore(app);
   const navigate = useNavigate();
@@ -50,6 +51,7 @@ function AddUserForm() {
 
   const handleSendOtp = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
     try {
       // Step 1: Check if admin email exists in Firestore with role=admin
@@ -62,6 +64,7 @@ function AddUserForm() {
 
       if (querySnapshot.empty) {
         alert("Admin email not found in the database.");
+        setIsLoading(false);
         return;
       }
 
@@ -70,6 +73,7 @@ function AddUserForm() {
         alert(
           "Action not allowed. Admin email is not registered with role=admin."
         );
+        setIsLoading(false);
         return;
       }
 
@@ -77,14 +81,15 @@ function AddUserForm() {
       const newOtp = Math.floor(1000 + Math.random() * 9000); // Generate 4-digit OTP
       setGeneratedOtp(newOtp.toString()); // Save OTP for later verification
 
-      emailjs.send(
-        import.meta.env.VITE_EMAILJS_SERVICE_ID, // Service ID
-        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+      // Send email using EmailJS
+      await emailjs.send(
+        process.env.REACT_APP_EMAILJS_SERVICE_ID, // Service ID from .env
+        process.env.REACT_APP_EMAILJS_TEMPLATE_ID, // Template ID from .env
         {
           admin_email: adminEmail,
           otp: newOtp,
         },
-         import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+        process.env.REACT_APP_EMAILJS_PUBLIC_KEY // Public key from .env
       );
 
       alert("OTP sent to admin email!");
@@ -92,6 +97,8 @@ function AddUserForm() {
     } catch (error) {
       console.error("Error sending OTP:", error);
       alert("Failed to send OTP. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -122,37 +129,13 @@ function AddUserForm() {
     }
   };
 
-  const handleFirstAdminRegistration = async (e) => {
-    e.preventDefault();
-
-    try {
-      // Add the first admin directly without OTP verification
-      const userData = {
-        name,
-        email,
-        role: "admin",
-        status: "active",
-      };
-
-      await addDoc(collection(db, "users"), userData);
-      alert("First admin registered successfully!");
-      navigate("/userManagement");
-    } catch (error) {
-      console.error("Error adding first admin:", error);
-      alert("Failed to register admin. Please try again.");
-    }
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold mb-6 text-center">
           {isFirstAdmin ? "Register First Admin" : "Add User"}
         </h2>
-        <form
-          onSubmit={isFirstAdmin ? handleFirstAdminRegistration : handleSendOtp}
-          className="space-y-4"
-        >
+        <form onSubmit={handleSendOtp} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Name
@@ -179,20 +162,18 @@ function AddUserForm() {
             />
           </div>
 
-          {!isFirstAdmin && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Admin Email
-              </label>
-              <input
-                type="email"
-                value={adminEmail}
-                onChange={(e) => setAdminEmail(e.target.value)}
-                required
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-              />
-            </div>
-          )}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Admin Email
+            </label>
+            <input
+              type="email"
+              value={adminEmail}
+              onChange={(e) => setAdminEmail(e.target.value)}
+              required
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+            />
+          </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700">
@@ -210,7 +191,7 @@ function AddUserForm() {
             </select>
           </div>
 
-          {otpSent && !isFirstAdmin && (
+          {otpSent && (
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Enter OTP
@@ -228,9 +209,12 @@ function AddUserForm() {
           {!otpSent ? (
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white py-2 px-4 rounded-md"
+              className={`w-full ${
+                isLoading ? "bg-gray-400" : "bg-blue-500"
+              } text-white py-2 px-4 rounded-md`}
+              disabled={isLoading}
             >
-              {isFirstAdmin ? "Register Admin" : "Send OTP"}
+              {isLoading ? "Sending OTP..." : "Send OTP"}
             </button>
           ) : (
             <button
