@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 // Create the LoginContext to share login state
 const LoginContext = createContext();
@@ -8,32 +8,35 @@ export function useLogin() {
   return useContext(LoginContext);
 }
 
-// Provider component that will wrap the application
+// Provider component that wraps the application
 export function LoginProvider({ children }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   // Check if the user is already logged in when the app starts
   useEffect(() => {
-    const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+    const user = localStorage.getItem("user") || sessionStorage.getItem("user");
     if (user) {
       setIsLoggedIn(true);
     }
   }, []);
 
-  const login = () => {
+  // Login function
+  const login = (user, rememberMe = false) => {
     setIsLoggedIn(true);
-    localStorage.setItem('user', 'true'); // Store a flag indicating the user is logged in
+    const storage = rememberMe ? localStorage : sessionStorage;
+    storage.setItem("user", JSON.stringify(user)); // Store user data
   };
 
+  // Logout function
   const logout = () => {
     setIsLoggedIn(false);
-    localStorage.removeItem('user'); // Remove the stored login flag
-    sessionStorage.removeItem('user'); // Optionally clear session storage
+    localStorage.removeItem("user");
+    sessionStorage.removeItem("user");
   };
 
   return (
     <LoginContext.Provider value={{ isLoggedIn, login, logout }}>
-      {children} {/* This will be your app or any components inside the LoginProvider */}
+      {children}
     </LoginContext.Provider>
   );
 }

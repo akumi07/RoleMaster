@@ -1,15 +1,15 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../firebase/firebase';
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
-import Navbar from './Navbar';
+import { useLogin } from '../context/LoginContext';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
+  const { login } = useLogin(); // Access login method from context
 
   // Handle Login
   const handleLogin = async () => {
@@ -22,6 +22,9 @@ function Login() {
       } else {
         sessionStorage.setItem('user', JSON.stringify(userCredential.user));
       }
+
+      // Update login state in context
+      login();
 
       // Redirect to dashboard or any other route
       navigate('/userManagement');
@@ -48,7 +51,6 @@ function Login() {
 
   return (
     <div className="font-[sans-serif]">
-      {/* <Navbar/> */}
       <div className="min-h-screen flex fle-col items-center justify-center py-6 px-4 mt-10">
         <div className="grid md:grid-cols-2 items-center gap-4 max-w-6xl w-full">
           <div className="border border-gray-300 rounded-lg p-6 max-w-md shadow-[0_2px_22px_-4px_rgba(93,96,127,0.2)] max-md:mx-auto">
@@ -150,5 +152,3 @@ function Login() {
 }
 
 export default Login;
-
-

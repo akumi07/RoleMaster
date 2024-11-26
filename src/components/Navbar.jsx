@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react"; 
-import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/react";
+import React, { useEffect } from "react";
+import { Disclosure, DisclosureButton } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
-import { useLogin } from "../context/LoginContext";  // Import the custom hook
+import { useLogin } from "../context/LoginContext"; // Import the custom hook
 
 const navigation = [
   { name: "Dashboard", href: "/userManagement", current: true },
@@ -13,12 +13,12 @@ function classNames(...classes) {
 }
 
 export default function Navbar() {
-  const { isLoggedIn, login, logout } = useLogin();  // Access login state and actions from context
+  const { isLoggedIn, login, logout } = useLogin(); // Access login state and actions from context
   const navigate = useNavigate();
 
   // Check login state on page load (to handle manual login)
   useEffect(() => {
-    const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+    const user = localStorage.getItem("user") || sessionStorage.getItem("user");
     if (user) {
       login(); // If a user is found in local/session storage, mark as logged in
     }
@@ -29,6 +29,7 @@ export default function Navbar() {
       // Logout logic
       logout();
       alert("You have been logged out!");
+      navigate("/login");
     } else {
       // Redirect to login page
       navigate("/login");
@@ -53,7 +54,10 @@ export default function Navbar() {
             </DisclosureButton>
           </div>
           <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-            <div className="flex shrink-0 items-center">
+            <div
+              className="flex shrink-0 items-center cursor-pointer"
+              onClick={() => navigate("/")} // Redirect to homepage on logo click
+            >
               <img alt="Your Company" src="/logo.svg" className="h-8 w-auto" />
             </div>
             <div className="hidden sm:ml-6 sm:block">
@@ -93,7 +97,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      <DisclosurePanel className="sm:hidden">
+      <Disclosure.Panel className="sm:hidden">
         <div className="space-y-1 px-2 pb-3 pt-2">
           {navigation.map((item) => (
             <DisclosureButton
@@ -112,7 +116,7 @@ export default function Navbar() {
             </DisclosureButton>
           ))}
         </div>
-      </DisclosurePanel>
+      </Disclosure.Panel>
     </Disclosure>
   );
 }
