@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  getFirestore,
-  collection,
-  query,
-  where,
-  getDocs,
-  addDoc,
-} from "firebase/firestore";
+import { getFirestore, collection, query, where, getDocs, addDoc } from "firebase/firestore";
 import { app } from "../firebase/firebase";
 import { useNavigate } from "react-router-dom";
 import emailjs from "emailjs-com";
@@ -29,10 +22,7 @@ function AddUserForm() {
   useEffect(() => {
     const checkForAdmins = async () => {
       try {
-        const adminQuery = query(
-          collection(db, "users"),
-          where("role", "==", "admin")
-        );
+        const adminQuery = query(collection(db, "users"), where("role", "==", "admin"));
         const adminSnapshot = await getDocs(adminQuery);
 
         if (adminSnapshot.empty) {
@@ -54,10 +44,7 @@ function AddUserForm() {
     try {
       // Step 1: Check if admin email exists in Firestore with role=admin
       const querySnapshot = await getDocs(
-        query(
-          collection(db, "users"),
-          where("email", "==", adminEmail.toLowerCase())
-        )
+        query(collection(db, "users"), where("email", "==", adminEmail.toLowerCase()))
       );
 
       if (querySnapshot.empty) {
@@ -67,9 +54,7 @@ function AddUserForm() {
 
       const adminDoc = querySnapshot.docs[0]; // Get the first document that matches the email
       if (adminDoc.data().role !== "admin") {
-        alert(
-          "Action not allowed. Admin email is not registered with role=admin."
-        );
+        alert("Action not allowed. Admin email is not registered with role=admin.");
         return;
       }
 
@@ -78,13 +63,13 @@ function AddUserForm() {
       setGeneratedOtp(newOtp.toString()); // Save OTP for later verification
 
       emailjs.send(
-        import.meta.env.VITE_EMAILJS_SERVICE_ID, // Service ID
-        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+        "service_ycm82mm",
+        "template_am3a9pe",
         {
           admin_email: adminEmail,
           otp: newOtp,
         },
-        import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+        "EOk49gnsD3jmv2nIt"
       );
 
       alert("OTP sent to admin email!");
@@ -149,14 +134,9 @@ function AddUserForm() {
         <h2 className="text-2xl font-bold mb-6 text-center">
           {isFirstAdmin ? "Register First Admin" : "Add User"}
         </h2>
-        <form
-          onSubmit={isFirstAdmin ? handleFirstAdminRegistration : handleSendOtp}
-          className="space-y-4"
-        >
+        <form onSubmit={isFirstAdmin ? handleFirstAdminRegistration : handleSendOtp} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Name
-            </label>
+            <label className="block text-sm font-medium text-gray-700">Name</label>
             <input
               type="text"
               value={name}
@@ -167,9 +147,7 @@ function AddUserForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Email
-            </label>
+            <label className="block text-sm font-medium text-gray-700">Email</label>
             <input
               type="email"
               value={email}
@@ -181,9 +159,7 @@ function AddUserForm() {
 
           {!isFirstAdmin && (
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Admin Email
-              </label>
+              <label className="block text-sm font-medium text-gray-700">Admin Email</label>
               <input
                 type="email"
                 value={adminEmail}
@@ -195,9 +171,7 @@ function AddUserForm() {
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Role
-            </label>
+            <label className="block text-sm font-medium text-gray-700">Role</label>
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
@@ -212,9 +186,7 @@ function AddUserForm() {
 
           {otpSent && !isFirstAdmin && (
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Enter OTP
-              </label>
+              <label className="block text-sm font-medium text-gray-700">Enter OTP</label>
               <input
                 type="text"
                 value={otp}
@@ -243,9 +215,7 @@ function AddUserForm() {
         </form>
 
         {verificationStatus && (
-          <div className="mt-4 text-center text-red-500">
-            {verificationStatus}
-          </div>
+          <div className="mt-4 text-center text-red-500">{verificationStatus}</div>
         )}
       </div>
     </div>
