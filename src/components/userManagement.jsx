@@ -14,7 +14,6 @@ import {
 } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 
-
 const UserManagement = () => {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
@@ -72,6 +71,25 @@ const UserManagement = () => {
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
+  };
+  const handleEdit = async () => {
+    // const currentUser = auth.currentUser;
+    if (isAdmin) {
+      navigate(`/update-user`, {
+        state: {
+          name: users.name,
+          email: users.email,
+          userId: users.id,
+          role: users.role,
+        },
+      });
+    }
+      
+
+      else{
+        // If the logged-in user is not an admin, show an alert message
+        alert("Action is allowed to admin only.");
+      } 
   };
 
   const filteredUsers = users.filter(
@@ -244,13 +262,15 @@ const UserManagement = () => {
                     className="rounded"
                   />
                 </td>
-                <td className=" p-4 
+                <td
+                  className=" p-4 
     truncate 
     whitespace-nowrap 
     overflow-hidden 
     text-ellipsis 
     min-w-[200px] 
-    max-w-[250px]">
+    max-w-[250px]"
+                >
                   <img
                     src={`https://i.pravatar.cc/50?u=${user.id}`}
                     alt={user.name}
@@ -297,11 +317,12 @@ const UserManagement = () => {
 
                 <td className="p-4 text-center">
                   <button
-                    onClick={() => navigate(`/edit-user/${user.id}`)}
+                    onClick={() => handleEdit(user.id)}
                     className="text-blue-500 hover:text-blue-600"
                   >
                     <FaEdit />
                   </button>
+
                   <button
                     onClick={() => {
                       setUserToDelete(user);

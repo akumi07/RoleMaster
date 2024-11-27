@@ -133,7 +133,7 @@ function Register() {
               <p className="text-sm !mt-8 text-center text-gray-800">
                 Already have an account{' '}
                 <span
-                  onClick={() => navigate('/userManagement')}
+                  onClick={() => navigate('/login')}
                   className="text-blue-600 font-semibold hover:underline ml-1 whitespace-nowrap cursor-pointer"
                 >
                   Login here

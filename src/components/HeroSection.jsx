@@ -1,10 +1,10 @@
 import Navbar from "./Navbar"
 
 const links = [
-    { name: 'Open roles', href: '#' },
-    { name: 'Internship program', href: '#' },
-    { name: 'Our values', href: '#' },
-    { name: 'Meet our leadership', href: '#' },
+    { name: 'Get Started', href: '/login' },
+    { name: 'Pricing', href: '/pricing' },
+    { name: 'Contact Us', href: '/contact' },
+    { name: 'Meet our leadership', href: '/leadership' },
   ]
   const stats = [
     { name: 'Offices worldwide', value: '12' },
@@ -51,8 +51,9 @@ const links = [
           <div className="mx-auto max-w-2xl lg:mx-0">
             <h2 className="text-5xl font-semibold tracking-tight text-white sm:text-7xl">Work with us</h2>
             <p className="mt-8 text-pretty text-lg font-medium text-gray-300 sm:text-xl/8">
-              Anim aute id magna aliqua ad ad non deserunt sunt. Qui irure qui lorem cupidatat commodo. Elit sunt amet
-              fugiat veniam occaecat fugiat.
+            Join our mission to build secure and efficient systems through innovative Role-Based Access Control (RBAC) solutions. 
+    Whether you're a seasoned professional or a rising star, we value your contributions in shaping the future of access 
+    management and digital security.
             </p>
           </div>
           <div className="mx-auto mt-10 max-w-2xl lg:mx-0 lg:max-w-none">
