@@ -10,7 +10,7 @@ import Update from "./components/Update";
 import UpdateUser from "./components/Update";
 import Pricing from "./components/Pricing";
 import Leadership from "./components/Leadership";
-import ContactUS from "./components/contactUS";
+import ContactUS from "./components/ContactUS";
 
   function App() {
   return (
