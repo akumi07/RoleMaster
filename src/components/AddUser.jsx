@@ -83,13 +83,13 @@ function AddUserForm() {
 
       // Send email using EmailJS
       await emailjs.send(
-        process.env.REACT_APP_EMAILJS_SERVICE_ID, // Service ID from .env
-        process.env.REACT_APP_EMAILJS_TEMPLATE_ID, // Template ID from .env
+        import.meta.env.VITE_EMAILJS_SERVICE_ID, // Service ID from .env
+        import.meta.env.VITE_EMAILJS_TEMPLATE_ID, // Template ID from .env
         {
           admin_email: adminEmail,
           otp: newOtp,
         },
-        process.env.REACT_APP_EMAILJS_PUBLIC_KEY // Public key from .env
+        import.meta.env.VITE_EMAILJS_PUBLIC_KEY// Public key from .env
       );
 
       alert("OTP sent to admin email!");
